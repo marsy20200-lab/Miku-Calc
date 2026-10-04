@@ -21,11 +21,12 @@ jobs:
       run: |
         pip install --upgrade "setuptools<60.0.0" "virtualenv<20.20.0" "cython<3.0.0" buildozer
         sudo apt-get update
-        sudo apt-get install -y libsqlite3-dev openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev
-
+        # Устанавливаем системные компоненты и Android SDK Build-Tools, где лежит утилита aidl
+        sudo apt-get install -y libsqlite3-dev openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev google-android-sdk-platform-tools-installer
+        
     - name: Build APK with Buildozer
       env:
-        # Автоматическое тихое согласие со всеми лицензиями Android SDK без вылетов
+        # Автоматическое тихое согласие со всеми лицензиями Android SDK
         ANDROID_NOT_UNATTENDED: "1"
       run: |
         buildozer -v android debug
