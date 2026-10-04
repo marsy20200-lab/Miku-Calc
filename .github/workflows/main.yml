@@ -21,8 +21,8 @@ jobs:
       run: |
         pip install --upgrade "setuptools<60.0.0" "virtualenv<20.20.0" "cython<3.0.0" buildozer
         sudo apt-get update
-        # Устанавливаем системные компоненты и Android SDK Build-Tools, где лежит утилита aidl
-        sudo apt-get install -y libsqlite3-dev openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev google-android-sdk-platform-tools-installer
+        # Устанавливаем официальный набор зависимостей Kivy и 32-битные библиотеки для инструментов Android
+        sudo apt-get install -y libsqlite3-dev openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev lib32stdc++6 lib32z1
         
     - name: Build APK with Buildozer
       env:
