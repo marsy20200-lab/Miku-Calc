@@ -1,22 +1,20 @@
 name: Build Miku Calc APK
 on: [workflow_dispatch, push]
+
 jobs:
-  build:
-    runs-on: ubuntu-22.04
+  android:
+    runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
-    - name: Install Tools
-      run: |
-        pip install --upgrade buildozer cython git+https://github.com
-        sudo apt-get update
-        sudo apt-get install -y libsqlite3-dev openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev
-    - name: Build APK
-      run: yes | buildozer -v android debug
-    - name: Upload
-      uses: actions/upload-artifact@v4
-      with:
-        name: MikuCalc-APK
-        path: bin/*.apk
+      - uses: actions/checkout@v4
+
+      - name: Build APK with Buildozer
+        uses: ArtemSBulgakov/buildozer-action@v1
+        with:
+          command: buildozer android debug
+          buildozer_version: master
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MikuCalc-APK
+          path: bin/*.apk
