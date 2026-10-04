@@ -32,3 +32,4 @@ jobs:
       with:
         name: MikuCalc-APK
         path: bin/*.apk
+
