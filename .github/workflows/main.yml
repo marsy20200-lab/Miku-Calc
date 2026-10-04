@@ -25,33 +25,39 @@ jobs:
 
     - name: Install System Dependencies (Fix Aidl)
       run: |
-        # Обновляем pip и базовые инструменты
         pip install --upgrade "setuptools<60.0.0" "virtualenv<20.20.0" "cython<3.0.0" buildozer
         sudo apt-get update
-        
-        # Принудительно ставим системный aidl и библиотеки совместимости Linux
+        # Жестко ставим системный aidl
         sudo apt-get install -y libsqlite3-dev autoconf libtool pkg-config zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev aidl lib32stdc++6 lib32z1
 
     - name: Auto-Accept Android SDK Licenses
       run: |
-        # Искусственно создаем пути, чтобы Android SDK Manager не ругался на отсутствие файлов
         mkdir -p ~/.android
         touch ~/.android/repositories.cfg
         
-        # Запускаем короткий старт, чтобы buildozer инициализировал скачивание менеджера Google
+        # Скачиваем SDK компоненты
         buildozer android debug || true
         
-        # Если менеджер скачался, принудительно подписываем все лицензии через автоматический ввод 'yes'
         if [ -d ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin ]; then
           yes | ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses || true
+          # Принудительно заставляем скачать build-tools версии 33.0.0
+          yes | ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager "build-tools;33.0.0" || true
         fi
+
+    - name: Force Fix Aidl Path For Buildozer
+      run: |
+        # ЖЕСТКИЙ ФИКС: Создаем ту самую папку, которую требует Buildozer
+        mkdir -p ~/.buildozer/android/platform/android-sdk/build-tools/33.0.0/
+        # Копируем системный рабочий aidl прямо ему в эту папку
+        cp /usr/bin/aidl ~/.buildozer/android/platform/android-sdk/build-tools/33.0.0/
+        # Даем файлу полные права на запуск
+        chmod +x ~/.buildozer/android/platform/android-sdk/build-tools/33.0.0/aidl
+        echo "=== Аидл успешно подсунут в папку Buildozer! ==="
 
     - name: Build APK with Buildozer
       env:
-        # Системный флаг для отключения интерактивных запросов Android
         ANDROID_NOT_UNATTENDED: "1"
       run: |
-        # Запуск финальной компиляции
         buildozer -v android debug
 
     - name: Upload APK Artifact
