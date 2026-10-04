@@ -24,12 +24,14 @@ jobs:
         sudo apt-get install -y libsqlite3-dev openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev
 
     - name: Build APK with Buildozer
+      env:
+        # Автоматическое тихое согласие со всеми лицензиями Android SDK без вылетов
+        ANDROID_NOT_UNATTENDED: "1"
       run: |
-        yes | buildozer -v android debug
+        buildozer -v android debug
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
       with:
         name: MikuCalc-APK
         path: bin/*.apk
-
