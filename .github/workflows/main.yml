@@ -23,22 +23,9 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y libsqlite3-dev openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev
 
-    - name: Pre-install Android SDK Tools (Fix Aidl)
-      run: |
-        # Принудительно создаем нужную папку и скачиваем официальные build-tools от Google
-        mkdir -p ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin
-        # Запускаем тихое обновление инструментов через buildozer
-        buildozer android debug || true
-        # Ручная принудительная установка стабильной версии build-tools, где точно есть рабочий aidl
-        if [ -f ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager ]; then
-          yes | ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager "build-tools;33.0.0"
-        fi
-
     - name: Build APK with Buildozer
-      env:
-        # Автоматическое тихое согласие со всеми лицензиями Android SDK
-        ANDROID_NOT_UNATTENDED: "1"
       run: |
+        # Запускаем сборку в автоматическом режиме обновления SDK компонентов
         buildozer -v android debug
 
     - name: Upload APK Artifact
