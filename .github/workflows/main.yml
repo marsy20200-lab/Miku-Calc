@@ -23,9 +23,19 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y libsqlite3-dev openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev
 
+    - name: Auto-Accept Android Licenses
+      run: |
+        # Принудительно создаем структуру папок для Android SDK, чтобы запустить менеджер лицензий
+        mkdir -p ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin
+        # Запускаем короткую инициализацию, чтобы Buildozer скачал инструменты
+        buildozer android debug || true
+        # Принудительно принимаем абсолютно все лицензии Google Android SDK автоматическим вводом 'yes'
+        if [ -d ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin ]; then
+          yes | ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses || true
+        fi
+
     - name: Build APK with Buildozer
       run: |
-        # Запускаем сборку в автоматическом режиме обновления SDK компонентов
         buildozer -v android debug
 
     - name: Upload APK Artifact
