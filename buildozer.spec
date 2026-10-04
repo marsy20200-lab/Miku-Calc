@@ -4,6 +4,7 @@ package.name = micucalc
 package.domain = org.miku
 source.dir = .
 source.include_exts = py,png,jpg,kv,atlas
+source.include_patterns = *.png,*.jpg,*.jpeg
 version = 0.1
 
 # (list) Application requirements
