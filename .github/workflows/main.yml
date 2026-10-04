@@ -23,39 +23,37 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
-    - name: Install System Dependencies (Fix Aidl)
+    - name: Install System Dependencies
       run: |
         pip install --upgrade "setuptools<60.0.0" "virtualenv<20.20.0" "cython<3.0.0" buildozer
         sudo apt-get update
-        # Жестко ставим системный aidl
-        sudo apt-get install -y libsqlite3-dev autoconf libtool pkg-config zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev aidl lib32stdc++6 lib32z1
+        sudo apt-get install -y libsqlite3-dev autoconf libtool pkg-config zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev
 
-    - name: Auto-Accept Android SDK Licenses
+    - name: Manual Aidl Download and Setup
       run: |
-        mkdir -p ~/.android
-        touch ~/.android/repositories.cfg
-        
-        # Скачиваем SDK компоненты
-        buildozer android debug || true
-        
-        if [ -d ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin ]; then
-          yes | ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses || true
-          # Принудительно заставляем скачать build-tools версии 33.0.0
-          yes | ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager "build-tools;33.0.0" || true
-        fi
-
-    - name: Force Fix Aidl Path For Buildozer
-      run: |
-        # ЖЕСТКИЙ ФИКС: Создаем ту самую папку, которую требует Buildozer
+        # 1. Принудительно создаем структуру папок, которую так сильно требует Buildozer
         mkdir -p ~/.buildozer/android/platform/android-sdk/build-tools/33.0.0/
-        # Копируем системный рабочий aidl прямо ему в эту папку
-        cp /usr/bin/aidl ~/.buildozer/android/platform/android-sdk/build-tools/33.0.0/
-        # Даем файлу полные права на запуск
+        
+        # 2. Скачиваем чистый, рабочий бинарник aidl напрямую из репозиториев
+        wget http://debian.org
+        
+        # 3. Распаковываем скачанный пакет во временную папку
+        ar x aidl_10.0.0+r36-1_amd64.deb
+        tar -xf data.tar.xz
+        
+        # 4. Переносим готовый файл aidl прямо под нос Buildozer
+        cp usr/lib/android-sdk/build-tools/aidl ~/.buildozer/android/platform/android-sdk/build-tools/33.0.0/
+        
+        # 5. Даем файлу железные права на запуск в системе Linux
         chmod +x ~/.buildozer/android/platform/android-sdk/build-tools/33.0.0/aidl
-        echo "=== Аидл успешно подсунут в папку Buildozer! ==="
+        
+        # Проверяем, что файл действительно лежит на месте
+        ls -la ~/.buildozer/android/platform/android-sdk/build-tools/33.0.0/
+        echo "=== СКАЧАЛИ И ПОДСУНУЛИ АИДЛ ВРУЧНУЮ! ==="
 
     - name: Build APK with Buildozer
       env:
+        # Системный флаг, отключающий любые другие требования лицензий
         ANDROID_NOT_UNATTENDED: "1"
       run: |
         buildozer -v android debug
